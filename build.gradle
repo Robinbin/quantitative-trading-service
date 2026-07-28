@@ -41,6 +41,9 @@ dependencies {
     // 技术指标计算
     implementation 'org.ta4j:ta4j-core:0.16'
 
+    // OpenAPI / Swagger UI
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
+
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
