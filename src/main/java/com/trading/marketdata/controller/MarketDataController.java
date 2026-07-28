@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/market-data")
@@ -44,6 +45,13 @@ public class MarketDataController {
     public ResponseEntity<FundamentalData> getFundamental(@PathVariable String symbol) {
         FundamentalData fd = service.getFundamental(symbol.toUpperCase());
         return fd != null ? ResponseEntity.ok(fd) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/batch/tick")
+    public ResponseEntity<Map<String, TickQuote>> getBatchTick(
+            @RequestParam List<String> symbols) {
+        List<String> upper = symbols.stream().map(String::toUpperCase).collect(Collectors.toList());
+        return ResponseEntity.ok(service.getBatchTick(upper));
     }
 
     @PostMapping("/{symbol}/refresh")

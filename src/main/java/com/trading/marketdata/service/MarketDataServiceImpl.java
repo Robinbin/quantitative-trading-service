@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MarketDataServiceImpl implements MarketDataService {
@@ -46,6 +48,18 @@ public class MarketDataServiceImpl implements MarketDataService {
             if (tick != null) cache.putTick(symbol, tick);
             return tick;
         });
+    }
+
+    @Override
+    public Map<String, TickQuote> getBatchTick(List<String> symbols) {
+        Map<String, TickQuote> result = new HashMap<>();
+        for (String symbol : symbols) {
+            TickQuote tick = getTick(symbol);
+            if (tick != null) {
+                result.put(symbol, tick);
+            }
+        }
+        return result;
     }
 
     @Override
