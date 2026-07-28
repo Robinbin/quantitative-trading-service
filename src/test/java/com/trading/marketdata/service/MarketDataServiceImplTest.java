@@ -14,7 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -91,6 +93,59 @@ class MarketDataServiceImplTest {
 
         assertThat(result).isNull();
         verify(cache, never()).putTick(any(), any());
+    }
+
+    // ── getBatchTick ──────────────────────────────────────────────────────────
+
+    @Test
+    void getBatchTick_shouldReturnTickForEachSymbol() {
+        TickQuote aaplTick = sampleTick();
+        when(cache.getTick("AAPL")).thenReturn(Optional.of(aaplTick));
+        when(cache.getTick("TSLA")).thenReturn(Optional.empty());
+        when(provider.fetchTick("TSLA")).thenReturn(sampleTick());
+
+        Map<String, TickQuote> result = service.getBatchTick(Set.of("AAPL", "TSLA"));
+
+        assertThat(result).containsKey("AAPL").containsKey("TSLA");
+    }
+
+    @Test
+    void getBatchTick_shouldSkipSymbolsWhereProviderReturnsNull() {
+        when(cache.getTick("AAPL")).thenReturn(Optional.empty());
+        when(provider.fetchTick("AAPL")).thenReturn(null);
+
+        Map<String, TickQuote> result = service.getBatchTick(Set.of("AAPL"));
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getBatchTick_shouldContinueWhenOneSymbolThrows() {
+        when(cache.getTick("AAPL")).thenReturn(Optional.empty());
+        when(provider.fetchTick("AAPL")).thenThrow(new RuntimeException("timeout"));
+        TickQuote tslaTickQuote = sampleTick();
+        when(cache.getTick("TSLA")).thenReturn(Optional.of(tslaTickQuote));
+
+        Map<String, TickQuote> result = service.getBatchTick(Set.of("AAPL", "TSLA"));
+
+        assertThat(result).containsOnlyKeys("TSLA");
+    }
+
+    @Test
+    void getBatchTick_shouldReturnEmptyMapForEmptyInput() {
+        Map<String, TickQuote> result = service.getBatchTick(Set.of());
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getBatchTick_shouldDeduplicateSymbols() {
+        TickQuote tick = sampleTick();
+        when(cache.getTick("AAPL")).thenReturn(Optional.of(tick));
+
+        // Set.of dedups on input, provider should only be called once
+        service.getBatchTick(Set.of("AAPL"));
+
+        verify(cache, times(1)).getTick("AAPL");
     }
 
     // ── getIndicators ─────────────────────────────────────────────────────────
