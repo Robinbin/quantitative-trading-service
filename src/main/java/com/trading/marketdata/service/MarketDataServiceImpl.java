@@ -8,9 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 @Service
 public class MarketDataServiceImpl implements MarketDataService {
@@ -51,15 +53,17 @@ public class MarketDataServiceImpl implements MarketDataService {
     }
 
     @Override
-    public Map<String, TickQuote> getBatchTick(List<String> symbols) {
-        Map<String, TickQuote> result = new HashMap<>();
-        for (String symbol : symbols) {
-            TickQuote tick = getTick(symbol);
-            if (tick != null) {
-                result.put(symbol, tick);
+    public Map<String, TickQuote> getBatchTick(Set<String> symbols) {
+        Map<String, TickQuote> result = new ConcurrentSkipListMap<>();
+        symbols.parallelStream().forEach(symbol -> {
+            try {
+                TickQuote tick = getTick(symbol);
+                if (tick != null) result.put(symbol, tick);
+            } catch (Exception e) {
+                log.warn("Failed to fetch tick for {} in batch request: {}", symbol, e.getMessage());
             }
-        }
-        return result;
+        });
+        return new TreeMap<>(result);
     }
 
     @Override

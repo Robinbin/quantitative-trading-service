@@ -4,6 +4,7 @@ import com.trading.marketdata.domain.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface MarketDataService {
 
@@ -11,7 +12,7 @@ public interface MarketDataService {
 
     TickQuote getTick(String symbol);
 
-    Map<String, TickQuote> getBatchTick(List<String> symbols);
+    Map<String, TickQuote> getBatchTick(Set<String> symbols);
 
     TechnicalIndicators getIndicators(String symbol, BarInterval interval);
 

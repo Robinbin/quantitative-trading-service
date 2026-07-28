@@ -12,11 +12,14 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.anySet;
 
 @WebMvcTest(MarketDataController.class)
 class MarketDataControllerIntegrationTest {
@@ -80,6 +83,46 @@ class MarketDataControllerIntegrationTest {
 
         mockMvc.perform(get("/api/v1/market-data/UNKNOWN/tick"))
                 .andExpect(status().isNotFound());
+    }
+
+    // ── GET /batch/tick ───────────────────────────────────────────────────────
+
+    @Test
+    void getBatchTick_shouldReturn200WithResultMap() throws Exception {
+        when(service.getBatchTick(Set.of("AAPL", "TSLA")))
+                .thenReturn(Map.of("AAPL", sampleTick(), "TSLA", sampleTick()));
+
+        mockMvc.perform(get("/api/v1/market-data/batch/tick")
+                        .param("symbols", "AAPL", "TSLA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.AAPL.symbol").value("AAPL"));
+    }
+
+    @Test
+    void getBatchTick_shouldReturn200WithEmptyMapWhenNoTicksFound() throws Exception {
+        when(service.getBatchTick(Set.of("UNKNOWN"))).thenReturn(Map.of());
+
+        mockMvc.perform(get("/api/v1/market-data/batch/tick")
+                        .param("symbols", "UNKNOWN"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("{}"));
+    }
+
+    @Test
+    void getBatchTick_shouldConvertSymbolsToUppercase() throws Exception {
+        when(service.getBatchTick(Set.of("AAPL"))).thenReturn(Map.of());
+
+        mockMvc.perform(get("/api/v1/market-data/batch/tick")
+                        .param("symbols", "aapl"))
+                .andExpect(status().isOk());
+
+        verify(service).getBatchTick(Set.of("AAPL"));
+    }
+
+    @Test
+    void getBatchTick_shouldReturn400WhenSymbolsIsEmpty() throws Exception {
+        mockMvc.perform(get("/api/v1/market-data/batch/tick"))
+                .andExpect(status().isBadRequest());
     }
 
     // ── GET /indicators ───────────────────────────────────────────────────────
