@@ -4,6 +4,7 @@ import com.trading.marketdata.domain.*;
 import com.trading.marketdata.provider.MarketDataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -15,16 +16,18 @@ public class YahooFinanceProvider implements MarketDataProvider {
 
     private static final Logger log = LoggerFactory.getLogger(YahooFinanceProvider.class);
 
-    private static final String BASE_URL = "https://query1.finance.yahoo.com";
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
     private static final Duration TIMEOUT = Duration.ofSeconds(15);
 
     private final WebClient webClient;
     private final YahooResponseParser parser;
 
-    public YahooFinanceProvider(WebClient.Builder builder, YahooResponseParser parser) {
+    public YahooFinanceProvider(
+            WebClient.Builder builder,
+            YahooResponseParser parser,
+            @Value("${trading.market-data.yahoo-base-url:https://query1.finance.yahoo.com}") String baseUrl) {
         this.webClient = builder
-                .baseUrl(BASE_URL)
+                .baseUrl(baseUrl)
                 .defaultHeader("User-Agent", USER_AGENT)
                 .build();
         this.parser = parser;

@@ -18,11 +18,7 @@ public class YahooResponseParser {
 
     private static final Logger log = LoggerFactory.getLogger(YahooResponseParser.class);
 
-    private final ObjectMapper mapper;
-
-    public YahooResponseParser(ObjectMapper mapper) {
-        this.mapper = mapper;
-    }
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public List<OhlcvBar> parseOhlcv(String json, String symbol, BarInterval interval) {
         List<OhlcvBar> bars = new ArrayList<>();

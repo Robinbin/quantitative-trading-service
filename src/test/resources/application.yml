@@ -1,0 +1,13 @@
+spring:
+  ai:
+    openai:
+      api-key: test-key
+  cache:
+    type: caffeine
+
+trading:
+  market-data:
+    watch-list: []
+    tick-refresh-seconds: 30
+    ohlcv-refresh-minutes: 5
+    yahoo-base-url: https://query1.finance.yahoo.com

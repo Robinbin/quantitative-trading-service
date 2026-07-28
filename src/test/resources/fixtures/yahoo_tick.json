@@ -1,0 +1,20 @@
+{
+  "quoteSummary": {
+    "result": [{
+      "price": {
+        "regularMarketPrice":         {"raw": 183.0,  "fmt": "183.00"},
+        "regularMarketOpen":          {"raw": 181.5,  "fmt": "181.50"},
+        "regularMarketDayHigh":       {"raw": 184.5,  "fmt": "184.50"},
+        "regularMarketDayLow":        {"raw": 181.0,  "fmt": "181.00"},
+        "regularMarketPreviousClose": {"raw": 181.0,  "fmt": "181.00"},
+        "regularMarketChange":        {"raw": 2.0,    "fmt": "+2.00"},
+        "regularMarketChangePercent": {"raw": 0.01105,"fmt": "+1.10%"},
+        "regularMarketVolume":        {"raw": 50000000, "fmt": "50M"},
+        "marketCap":                  {"raw": 2850000000000, "fmt": "2.85T"},
+        "currency": "USD",
+        "exchangeName": "NMS"
+      }
+    }],
+    "error": null
+  }
+}

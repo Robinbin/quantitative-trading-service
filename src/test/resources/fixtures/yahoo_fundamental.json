@@ -1,0 +1,29 @@
+{
+  "quoteSummary": {
+    "result": [{
+      "assetProfile": {
+        "longName": "Apple Inc.",
+        "sector":   "Technology",
+        "industry": "Consumer Electronics"
+      },
+      "defaultKeyStatistics": {
+        "priceToBook": {"raw": 47.5,  "fmt": "47.50"},
+        "trailingEps": {"raw": 6.43,  "fmt": "6.43"},
+        "beta":        {"raw": 1.26,  "fmt": "1.26"}
+      },
+      "financialData": {
+        "priceToSalesTrailing12Months": {"raw": 7.8,          "fmt": "7.80"},
+        "totalRevenue":                 {"raw": 383285000000, "fmt": "383.29B"},
+        "netIncomeToCommon":            {"raw": 96995000000,  "fmt": "97.00B"}
+      },
+      "summaryDetail": {
+        "trailingPE":       {"raw": 28.5,   "fmt": "28.50"},
+        "forwardPE":        {"raw": 25.0,   "fmt": "25.00"},
+        "dividendYield":    {"raw": 0.0053, "fmt": "0.53%"},
+        "fiftyTwoWeekHigh": {"raw": 199.62, "fmt": "199.62"},
+        "fiftyTwoWeekLow":  {"raw": 124.17, "fmt": "124.17"}
+      }
+    }],
+    "error": null
+  }
+}
