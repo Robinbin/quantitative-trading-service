@@ -27,9 +27,17 @@ dependencies {
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // Spring AI - OpenAI (可按需替换为其他模型)
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+
+    // 内存缓存
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
+
+    // 技术指标计算
+    implementation 'org.ta4j:ta4j-core:0.16'
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'

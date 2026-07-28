@@ -1,6 +1,8 @@
 spring:
   application:
     name: quantitative-trading-service
+  cache:
+    type: caffeine
   ai:
     openai:
       api-key: ${OPENAI_API_KEY:your-api-key-here}
@@ -20,6 +22,15 @@ management:
   endpoint:
     health:
       show-details: always
+
+trading:
+  market-data:
+    watch-list:
+      - AAPL
+      - TSLA
+      - MSFT
+    tick-refresh-seconds: 30
+    ohlcv-refresh-minutes: 5
 
 logging:
   level:
