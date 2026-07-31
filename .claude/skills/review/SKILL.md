@@ -2,7 +2,7 @@
 name: review
 description: Code review for changed files — checks quality, security, tests, and Spring Boot conventions
 argument-hint: [file-or-PR-number]
-disable-model-invocation: true
+disable-model-invocation: false
 allowed-tools: [Read, Glob, Grep, Bash]
 ---
 

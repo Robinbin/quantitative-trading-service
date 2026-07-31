@@ -47,13 +47,14 @@ public class RiskCalculator {
             }
         }
 
-        if (logReturns.isEmpty()) return BigDecimal.ZERO;
+        if (logReturns.size() < 2) return BigDecimal.ZERO;
 
         double mean = logReturns.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-        double variance = logReturns.stream()
+        // Bessel's correction: divide by (N-1) for unbiased sample variance
+        double sumSqDev = logReturns.stream()
                 .mapToDouble(r -> (r - mean) * (r - mean))
-                .average()
-                .orElse(0.0);
+                .sum();
+        double variance = sumSqDev / (logReturns.size() - 1);
 
         double annualisedVol = Math.sqrt(variance) * Math.sqrt(TRADING_DAYS_PER_YEAR);
         return BigDecimal.valueOf(annualisedVol).setScale(SCALE, RoundingMode.HALF_UP);
@@ -132,14 +133,14 @@ public class RiskCalculator {
             if (prev > 0) returns.add((curr - prev) / prev);
         }
 
-        if (returns.isEmpty()) return BigDecimal.ZERO;
+        if (returns.size() < 2) return BigDecimal.ZERO;
 
         double meanDaily = returns.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-        double variance = returns.stream()
+        // Bessel's correction: divide by (N-1) for unbiased sample variance
+        double sumSqDev = returns.stream()
                 .mapToDouble(r -> (r - meanDaily) * (r - meanDaily))
-                .average()
-                .orElse(0.0);
-        double stdDev = Math.sqrt(variance);
+                .sum();
+        double stdDev = Math.sqrt(sumSqDev / (returns.size() - 1));
         if (stdDev == 0.0) return BigDecimal.ZERO;
 
         double annualReturn = meanDaily * TRADING_DAYS_PER_YEAR;

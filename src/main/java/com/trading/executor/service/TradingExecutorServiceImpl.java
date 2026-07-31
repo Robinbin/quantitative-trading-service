@@ -78,8 +78,12 @@ public class TradingExecutorServiceImpl implements TradingExecutorService {
 
     @Override
     public synchronized Order submitOrder(OrderRequest request) {
-        String     symbol       = request.symbol().toUpperCase();
-        BigDecimal currentPrice = marketDataService.getTick(symbol).price();
+        String    symbol = request.symbol().toUpperCase();
+        var       tick   = marketDataService.getTick(symbol);
+        if (tick == null) {
+            throw new IllegalStateException("No market data available for symbol: " + symbol);
+        }
+        BigDecimal currentPrice = tick.price();
         Instant    now          = Instant.now();
 
         // Cross-field validation: LIMIT orders require a limitPrice
@@ -108,7 +112,7 @@ public class TradingExecutorServiceImpl implements TradingExecutorService {
     }
 
     @Override
-    public List<Order> listOrders() {
+    public synchronized List<Order> listOrders() {
         return orders.values().stream()
                 .sorted(Comparator.comparing(Order::submittedAt).reversed())
                 .toList();
@@ -137,7 +141,7 @@ public class TradingExecutorServiceImpl implements TradingExecutorService {
     }
 
     @Override
-    public List<Position> listPositions() {
+    public synchronized List<Position> listPositions() {
         return positionStore.entrySet().stream()
                 .map(e -> enrichPosition(e.getKey(), e.getValue()))
                 .toList();
@@ -196,8 +200,8 @@ public class TradingExecutorServiceImpl implements TradingExecutorService {
             return buildOrder(symbol, req, OrderStatus.REJECTED, null, null,
                     "Insufficient cash: required " + cashRequired + ", available " + cash, now);
         }
-        // Deduct cash
-        cashBalance.set(cash.subtract(cashRequired).setScale(MONEY_SCALE, RoundingMode.HALF_UP));
+        // Deduct cash atomically — same pattern as executeSell
+        cashBalance.updateAndGet(c -> c.subtract(cashRequired).setScale(MONEY_SCALE, RoundingMode.HALF_UP));
         // Update position
         positionStore.merge(symbol,
                 new PositionState(req.quantity(), fillPrice),
@@ -251,7 +255,11 @@ public class TradingExecutorServiceImpl implements TradingExecutorService {
     private Position enrichPosition(String symbol, PositionState state) {
         BigDecimal currentPrice;
         try {
-            currentPrice = marketDataService.getTick(symbol).price();
+            var tick = marketDataService.getTick(symbol);
+            if (tick == null || tick.price() == null) {
+                throw new IllegalStateException("no price returned");
+            }
+            currentPrice = tick.price();
         } catch (Exception e) {
             log.warn("Could not fetch live price for {} during position enrichment — using avg cost", symbol);
             currentPrice = state.averageCost();
@@ -292,7 +300,12 @@ public class TradingExecutorServiceImpl implements TradingExecutorService {
         if (buyCount >= props.minStrategiesAgree() && avgBuyConf >= props.minConfidence()) {
             RiskLevel riskLevel = riskService.assessSymbol(symbol, interval).riskLevel();
             if (riskLevel != RiskLevel.CRITICAL && !positionStore.containsKey(symbol)) {
-                BigDecimal price  = marketDataService.getTick(symbol).price();
+                var        tickData = marketDataService.getTick(symbol);
+                if (tickData == null) {
+                    log.warn("No market data for {} — skipping auto-execute BUY", symbol);
+                    return;
+                }
+                BigDecimal price  = tickData.price();
                 BigDecimal budget = cashBalance.get()
                         .min(BigDecimal.valueOf(props.maxOrderValue()));
                 BigDecimal qty    = budget.divide(price, MONEY_SCALE, RoundingMode.HALF_UP);

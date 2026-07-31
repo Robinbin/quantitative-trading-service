@@ -103,7 +103,7 @@ public class AIAnalysisServiceImpl implements AIAnalysisService {
                                 List<StrategyResult> signals,
                                 RiskMetrics risk) {
         String price    = tick != null ? safeStr(tick.price()) : "N/A";
-        String currency = tick != null && tick.currency() != null ? tick.currency() : "USD";
+        String currency = tick != null && tick.currency() != null ? sanitize(tick.currency()) : "USD";
 
         return """
                 You are an expert quantitative financial analyst. Analyze the following data for %s and provide a concise trading recommendation.
@@ -130,7 +130,7 @@ public class AIAnalysisServiceImpl implements AIAnalysisService {
                 Respond with ONLY a JSON object (no markdown, no explanation) in this exact format:
                 {"summary":"2-3 sentence market analysis","recommendation":"BUY|HOLD|SELL","confidence":0.75,"keyFactors":["factor1","factor2","factor3"]}
                 """.formatted(
-                symbol, price, currency, interval.name(),
+                sanitize(symbol), price, currency, interval.name(),
                 ind != null ? safeStr(ind.rsi14()) : "N/A",
                 ind != null ? safeStr(ind.macdLine()) : "N/A",
                 ind != null ? safeStr(ind.signalLine()) : "N/A",
@@ -195,9 +195,18 @@ public class AIAnalysisServiceImpl implements AIAnalysisService {
     private String formatStrategyResults(List<StrategyResult> results) {
         if (results.isEmpty()) return "  (no strategy results available)";
         return results.stream()
-                .map(r -> "  - " + r.strategyName() + ": " + r.signal()
-                        + " (confidence=" + r.confidence() + ", reason=" + r.reason() + ")")
+                .map(r -> "  - " + sanitize(r.strategyName()) + ": " + r.signal()
+                        + " (confidence=" + r.confidence() + ", reason=" + sanitize(r.reason()) + ")")
                 .collect(Collectors.joining("\n"));
+    }
+
+    /**
+     * Strips characters that could be used for prompt injection or log injection
+     * (newlines, carriage returns, angle brackets) from external string data.
+     */
+    private static String sanitize(String input) {
+        if (input == null) return "N/A";
+        return input.replaceAll("[\\r\\n<>]", " ").trim();
     }
 
     private String safeStr(BigDecimal val) {
