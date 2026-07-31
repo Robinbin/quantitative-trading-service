@@ -11,3 +11,16 @@ trading:
     tick-refresh-seconds: 30
     ohlcv-refresh-minutes: 5
     yahoo-base-url: https://query1.finance.yahoo.com
+  risk:
+    stop-loss-pct: 0.05
+    take-profit-pct: 0.15
+    risk-free-rate: 0.05
+    volatility-thresholds:
+      low: 0.20
+      medium: 0.40
+      high: 0.60
+  executor:
+    initial-cash: 100000.0
+    max-order-value: 10000.0
+    min-strategies-agree: 3
+    min-confidence: 0.60
