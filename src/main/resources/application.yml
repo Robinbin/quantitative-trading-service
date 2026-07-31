@@ -39,6 +39,14 @@ trading:
       - MSFT
     tick-refresh-seconds: 30
     ohlcv-refresh-minutes: 5
+  risk:
+    stop-loss-pct: 0.05
+    take-profit-pct: 0.15
+    risk-free-rate: 0.05
+    volatility-thresholds:
+      low: 0.20
+      medium: 0.40
+      high: 0.60
 
 logging:
   level:
