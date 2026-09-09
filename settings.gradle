@@ -6,4 +6,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'quantitative-trading-service'
+rootProject.name = 'quantitative-service'
